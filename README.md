@@ -26,9 +26,11 @@ gamepad emparejado a la placa.
   (Xbox, PS4/PS5, Switch Pro, 8BitDo, etc.).
 - Las siguientes **librerías** instaladas desde el Library Manager
   del Arduino IDE:
-  - `TB6612_ESP32` (driver de motores)
   - `ESP32Servo`
   - `Adafruit NeoPixel`
+- La librería **TB6612FNG_ESP32**, que se instala manualmente desde
+  el ZIP incluido en la carpeta [`lib/`](lib/). Ver la sección
+  [Bibliotecas](#bibliotecas) más abajo.
 
 > Bluepad32 **no** se instala como librería aparte: viene incluido
 > con el core. Si ya tienes instalado el core oficial de Espressif,
@@ -45,6 +47,8 @@ balam-stem-sr/
 ├── codigo/
 │   └── balam-stem-sr/
 │       └── balam-stem-sr.ino   <-- el sketch
+├── lib/                        <-- librerías para instalar manualmente
+│   └── TB6612FNG_ESP32.zip
 ├── videos/
 │   └── README.md               <-- índice del curso Fase Aprende
 └── .gitignore
@@ -115,6 +119,30 @@ soporte de gamepads por Bluetooth. Los pasos generales son:
 > único importante es elegir la placa del grupo correcto
 > (**"esp32_bluepad32"**, no el **"esp32"** estándar) antes de
 > compilar.
+
+---
+
+## Bibliotecas
+
+Algunas librerías que usa el sketch **no** están en el Library
+Manager del Arduino IDE y vienen incluidas en la carpeta
+[`lib/`](lib/) de este repositorio. Tienes que instalarlas
+manualmente antes de compilar.
+
+### TB6612FNG_ESP32
+
+- Ubicada en [`lib/TB6612FNG_ESP32.zip`](lib/TB6612FNG_ESP32.zip).
+- Driver para el chip **TB6612FNG** (puente H dual) adaptado al
+  ESP32. 
+- **Cómo instalarla:**
+  1. Descarga el archivo `lib/TB6612FNG_ESP32.zip` desde GitHub
+     (botón **Download raw file**) **sin descomprimirlo**.
+  2. En el Arduino IDE ve a **Sketch → Include Library → Add .ZIP
+     Library…**
+  3. Selecciona el ZIP que acabas de descargar.
+  4. Verás un mensaje **"Library added to your libraries"** en la
+     consola.
+  5. Reinicia el Arduino IDE si te lo pide.
 
 ---
 
@@ -242,7 +270,8 @@ El sketch (`balam-stem-sr.ino`) hace lo siguiente:
 |---|---|
 | El control no se conecta a la placa. | Confirma que pusiste la MAC correcta en `allowedAddress` y que volviste a cargar el código. Revisa el monitor serial (115200 baud) — imprime la MAC del control que intenta conectarse y dice **"Controller rechazado"** si la MAC no coincide. |
 | El Arduino IDE no detecta el puerto. | Instala el driver USB de la placa (CP2102 o CH340 según el chip de tu Balam Stem Sr). En macOS suele bastar; en Windows tienes que descargarlo del fabricante. |
-| Error al compilar: librería no encontrada. | Verifica que tengas instaladas las 3 librerías de la sección **¿Qué necesitas?** desde el Library Manager. Si el error es de `Bluepad32.h`, revisa que estés usando una placa del grupo **"esp32_bluepad32"** (no la del grupo `esp32` estándar). |
+| Error al compilar: librería no encontrada. | Verifica que tengas instaladas las 2 librerías que van por Library Manager (`ESP32Servo` y `Adafruit NeoPixel`) **y** la `TB6612FNG_ESP32` desde el ZIP de [`lib/`](lib/). Si el error es de `Bluepad32.h`, revisa que estés usando una placa del grupo **"esp32_bluepad32"** (no la del grupo `esp32` estándar). |
+| Error al compilar: `TB6612_ESP32.h: No such file or directory`. | No tienes instalada la librería **TB6612FNG_ESP32**. Instálala desde el ZIP en [`lib/`](lib/) siguiendo los pasos de la sección **Bibliotecas**. |
 | Error al compilar: `Bluepad32.h: No such file or directory`. | Estás compilando contra el core oficial de Espressif. Cambia a una placa del grupo **"esp32_bluepad32"** en *Tools → Board*. Si no aparece, instala el core de Bluepad32 (ver sección **Instalar el core de Bluepad32**). |
 | Los motores giran al contrario. | Invierte el cableado físico de ese motor (cambia los dos cables del motor), o invierte los pines `IN1`/`IN2` de ese motor en el sketch. |
 
