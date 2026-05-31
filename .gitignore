@@ -1,0 +1,19 @@
+# Basura del sistema operativo
+.DS_Store
+desktop.ini
+Thumbs.db
+ehthumbs.db
+$RECYCLE.BIN/
+
+# Archivos temporales
+*~
+*.bak
+*.tmp
+
+# Salidas del Arduino IDE
+*.hex
+*.bin
+*.elf
+build/
+.pio/
+.vscode/
