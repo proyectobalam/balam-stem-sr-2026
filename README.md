@@ -16,20 +16,24 @@ gamepad emparejado a la placa.
 - Un **cable USB** para conectarla a la computadora.
 - El **[Arduino IDE](https://www.arduino.cc/en/software)** (2.x o
   1.8.19).
-- El **soporte para placas ESP32** instalado en el Arduino IDE
-  (Boards Manager).
+- El **core de ESP32 para Bluepad32** instalado en el Arduino IDE.
+  **Importante:** este robot **no** usa el core oficial de Espressif,
+  sino el core de **Bluepad32** (de Ricardo Quesada), porque trae
+  integrado el soporte de gamepad por Bluetooth. Ver la sección
+  [Instalar el core de Bluepad32](#instalar-el-core-de-bluepad32)
+  más abajo.
 - Un **control / gamepad Bluetooth** compatible con Bluepad32
   (Xbox, PS4/PS5, Switch Pro, 8BitDo, etc.).
 - Las siguientes **librerías** instaladas desde el Library Manager
   del Arduino IDE:
   - `TB6612_ESP32` (driver de motores)
   - `ESP32Servo`
-  - `Bluepad32` (gamepad por Bluetooth)
   - `Adafruit NeoPixel`
 
-> Si tu mentor te dio una guía de instalación específica para
-> Bluepad32, síguela: a veces se instala como Arduino Core en lugar
-> de como librería normal.
+> Bluepad32 **no** se instala como librería aparte: viene incluido
+> con el core. Si ya tienes instalado el core oficial de Espressif,
+> no lo desinstales; convive con el de Bluepad32 sin problema, sólo
+> tienes que elegir el correcto desde *Tools → Board* al compilar.
 
 ---
 
@@ -74,6 +78,28 @@ porque el Arduino IDE lo exige así.
 
 ---
 
+## Instalar el core de Bluepad32
+
+Bluepad32 reemplaza el core de ESP32 con uno propio que ya trae el
+soporte de gamepads por Bluetooth. La guía oficial (con la URL del
+*package index* que hay que pegar en *Preferences → Additional Boards
+Manager URLs* y los pasos exactos) está en el repositorio del
+proyecto:
+
+<https://github.com/ricardoquesada/bluepad32>
+
+Una vez instalado, en el Arduino IDE aparecerá un grupo de placas
+nuevo (algo como **"esp32_bluepad32"**) dentro del menú
+**Tools → Board**. Elige desde ahí la placa, **no** desde el grupo
+**"esp32"** estándar de Espressif.
+
+> Si en tu computadora ya tenías instalado el core oficial de
+> Espressif, no hace falta desinstalarlo. Conviven sin problema: lo
+> único importante es elegir la placa del grupo correcto antes de
+> compilar.
+
+---
+
 ## Cargar el código a la placa
 
 1. **Configura la MAC de tu control** en el código antes de
@@ -81,16 +107,14 @@ porque el Arduino IDE lo exige así.
    control](#configurar-la-mac-del-control) más abajo.
 2. Conecta la **Balam Stem Sr** al USB.
 3. En el Arduino IDE:
-   - **Tools → Board** → elige la placa ESP32 correspondiente
-     (normalmente *"ESP32 Dev Module"*, salvo que tu mentor indique
-     otra).
+   - **Tools → Board** → dentro del grupo **"esp32_bluepad32"** (el
+     que instalaste en el paso anterior) elige la placa
+     correspondiente (normalmente *"ESP32 Dev Module"*)
    - **Tools → Port** → selecciona el puerto donde aparece la placa.
 4. Haz clic en el botón **Upload** (la flecha derecha).
 5. Espera a que aparezca **"Done uploading"** en la consola.
 
-Si la consola se queda esperando conexión, mantén presionado el
-botón **BOOT** de la placa mientras empieza la carga, y suéltalo
-cuando empiece a transferir.
+
 
 ---
 
@@ -149,8 +173,7 @@ El sketch (`balam-stem-sr.ino`) hace lo siguiente:
   más sus respectivos pines de dirección).
 - **1 servo** en el pin 4 (posiciones 0°, 90°, 180°).
 - **Tira de 3 NeoPixels** en el pin 12, con un **switch físico** en
-  el pin 34 que cambia el color entre **rojo** y **ámbar** (con
-  antirrebote por software de 50 ms).
+  el pin 34 que cambia el color entre **rojo** y **ámbar** 
 - **Gamepad Bluetooth** vía Bluepad32, filtrado por MAC para que
   solo responda al control autorizado.
 
@@ -176,9 +199,8 @@ El sketch (`balam-stem-sr.ino`) hace lo siguiente:
   5, se considera 0 (evita drift del control).
 - Cuando un joystick está en 0, sus motores se ponen en `brake()`
   (freno electromagnético) en vez de quedar libres.
-- El loop principal corre cada 150 ms.
 - En cada vuelta del loop se revisa el switch del NeoPixel
-  (debounced) antes de procesar el gamepad.
+  antes de procesar el gamepad.
 
 ### Pines en resumen
 
@@ -202,10 +224,9 @@ El sketch (`balam-stem-sr.ino`) hace lo siguiente:
 |---|---|
 | El control no se conecta a la placa. | Confirma que pusiste la MAC correcta en `allowedAddress` y que volviste a cargar el código. Revisa el monitor serial (115200 baud) — imprime la MAC del control que intenta conectarse y dice **"Controller rechazado"** si la MAC no coincide. |
 | El Arduino IDE no detecta el puerto. | Instala el driver USB de la placa (CP2102 o CH340 según el chip de tu Balam Stem Sr). En macOS suele bastar; en Windows tienes que descargarlo del fabricante. |
-| Error al compilar: librería no encontrada. | Verifica que tengas instaladas las 4 librerías de la sección **¿Qué necesitas?** desde el Library Manager. |
+| Error al compilar: librería no encontrada. | Verifica que tengas instaladas las 3 librerías de la sección **¿Qué necesitas?** desde el Library Manager. Si el error es de `Bluepad32.h`, revisa que estés usando una placa del grupo **"esp32_bluepad32"** (no la del grupo `esp32` estándar). |
+| Error al compilar: `Bluepad32.h: No such file or directory`. | Estás compilando contra el core oficial de Espressif. Cambia a una placa del grupo **"esp32_bluepad32"** en *Tools → Board*. Si no aparece, instala el core de Bluepad32 (ver sección **Instalar el core de Bluepad32**). |
 | Los motores giran al contrario. | Invierte el cableado físico de ese motor (cambia los dos cables del motor), o invierte los pines `IN1`/`IN2` de ese motor en el sketch. |
-| Las NeoPixels no encienden o se quedan en un color. | Revisa el switch del pin 34 y la alimentación de la tira. |
-| Sale **"Couldn't find a board on the selected port"** al cargar. | Mantén presionado el botón **BOOT** mientras empieza la carga y suéltalo cuando comience a transferir. |
 
 ---
 
