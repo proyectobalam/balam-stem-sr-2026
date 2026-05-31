@@ -81,21 +81,39 @@ porque el Arduino IDE lo exige así.
 ## Instalar el core de Bluepad32
 
 Bluepad32 reemplaza el core de ESP32 con uno propio que ya trae el
-soporte de gamepads por Bluetooth. La guía oficial (con la URL del
-*package index* que hay que pegar en *Preferences → Additional Boards
-Manager URLs* y los pasos exactos) está en el repositorio del
-proyecto:
+soporte de gamepads por Bluetooth. Los pasos generales son:
 
-<https://github.com/ricardoquesada/bluepad32>
+1. Abre el Arduino IDE.
+2. Ve a **File → Preferences** (en macOS: **Arduino IDE →
+   Settings…**).
+3. En el campo **Additional Boards Manager URLs** pega las **dos**
+   URLs siguientes, separadas por una coma:
+   - Core oficial de ESP32 (Espressif):
+     ```
+     https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+     ```
+   - Paquete **Bluepad32 + ESP32**:
+     ```
+     https://raw.githubusercontent.com/ricardoquesada/esp32-arduino-lib-builder/master/bluepad32_files/package_esp32_bluepad32_index.json
+     ```
+4. Acepta y abre **Tools → Board → Boards Manager…**.
+5. Busca **"esp32_bluepad32"** e instálalo.
+6. Cuando termine, en **Tools → Board** aparecerá un grupo nuevo
+   llamado **"esp32_bluepad32"** con las placas ya listas.
 
-Una vez instalado, en el Arduino IDE aparecerá un grupo de placas
-nuevo (algo como **"esp32_bluepad32"**) dentro del menú
-**Tools → Board**. Elige desde ahí la placa, **no** desde el grupo
-**"esp32"** estándar de Espressif.
+### Recursos de apoyo
+
+- **Video tutorial** (instalación paso a paso):
+  <https://youtu.be/0jnY-XXiD8Q?si=ZwKLueboW7MDz08X>
+- **Guía oficial de Bluepad32 para Arduino** (referencia completa):
+  <https://bluepad32.readthedocs.io/en/latest/plat_arduino/>
+- **Repositorio del proyecto**:
+  <https://github.com/ricardoquesada/bluepad32>
 
 > Si en tu computadora ya tenías instalado el core oficial de
 > Espressif, no hace falta desinstalarlo. Conviven sin problema: lo
-> único importante es elegir la placa del grupo correcto antes de
+> único importante es elegir la placa del grupo correcto
+> (**"esp32_bluepad32"**, no el **"esp32"** estándar) antes de
 > compilar.
 
 ---
