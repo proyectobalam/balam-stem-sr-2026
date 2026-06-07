@@ -80,12 +80,12 @@ const int offsetB1 = 1;
 //        Ese valor es la MAC.
 //
 // Formato: 6 bytes en hexadecimal. Ejemplo: la MAC A9:D7:0D:A0:BD:A3
-// se escribe como {0xA9, 0xD7, 0x0D, 0xA0, 0xBD, 0xA3}.
+// se escribe como {0x41, 0x42, 0x32, 0xC2, 0x7B, 0xBB}.
 // =====================================================================
 const uint8_t allowedAddress[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 // ------------------- Motores -------------------
-Motor motor1  = Motor(M1_1, M1_2, PWM1, offsetA,  STBY,  5000, 8, 1);
+Motor motor1 = Motor(M1_1, M1_2, PWM1, offsetA, STBY, 5000, 8, 3); // cambio de canal para que no interfiera con el servo
 Motor motor2  = Motor(M3_1, M3_2, PWM3, offsetB,  STBY,  5000, 8, 2);
 Motor motor11 = Motor(M2_1, M2_2, PWM2, offsetA1, STBY1, 5000, 8, 4);
 Motor motor22 = Motor(M4_1, M4_2, PWM4, offsetB1, STBY1, 5000, 8, 5);
@@ -235,19 +235,32 @@ void processControllers() {
 void setup() {
   Serial.begin(115200);
 
-  pinMode(NEO_SWITCH, INPUT);
+  // -------------------------------------------------
+  // FIX: Reservar Timer 0 exclusivamente para el servo
+  // ANTES de inicializar cualquier motor.
+  // Esto fuerza a TB6612_ESP32 a usar Timer 1 y Timer 2
+  // para los canales PWM de los motores, evitando el
+  // conflicto con el stack Bluetooth (que usa Timer 0)
+  // y el problema de frecuencia compartida servo/motor.
+  // -------------------------------------------------
+  ESP32PWM::allocateTimer(0);
+  myServo.setPeriodHertz(50);
+  myServo.attach(SERVO_PIN, 1000, 2000);
+  myServo.write(SERVO_OFF);
 
+  // NeoPixels
+  pinMode(NEO_SWITCH, INPUT);
   tira.begin();
   tira.setBrightness(80);
   checkSwitch();
   applyNeoColor();
 
+  // Motores — se inicializan DESPUES del servo
+  // para que tomen Timer 1, 2, 3
   brake(motor1, motor2);
   brake(motor11, motor22);
 
-  myServo.attach(SERVO_PIN);
-  myServo.write(SERVO_OFF);
-
+  // Bluepad32
   BP32.setup(&onConnectedController, &onDisconnectedController);
   BP32.enableVirtualDevice(false);
 }
